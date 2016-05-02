@@ -354,6 +354,38 @@ describe('features/copy-paste', function() {
           expect(pasteRejected).to.have.been.called;
         }));
 
+
+        it('pasting participants on a process is disallowed when it\'s not a collaboration',
+        inject(function(copyPaste, elementRegistry, canvas, tooltips, eventBus, modeling, elementFactory) {
+          var participant = elementRegistry.get('Participant_145muai'),
+              otherParticipant = elementRegistry.get('Participant_0uu1rvj'),
+              startEvent = elementFactory.create('shape', { type: 'bpmn:StartEvent' }),
+              rootElement;
+
+          var pasteRejected = sinon.spy(function() {});
+
+          // when
+          copyPaste.copy([ participant ]);
+
+          modeling.removeElements([ participant, otherParticipant ]);
+
+          rootElement = canvas.getRootElement();
+
+          modeling.createShape(startEvent, { x: 50, y: 50 }, rootElement);
+
+          eventBus.on('elements.paste.rejected', pasteRejected);
+
+          copyPaste.paste({
+            element: rootElement,
+            point: {
+              x: 500,
+              y: 200
+            }
+          });
+
+          expect(pasteRejected).to.have.been.called;
+        }));
+
       });
 
     });
